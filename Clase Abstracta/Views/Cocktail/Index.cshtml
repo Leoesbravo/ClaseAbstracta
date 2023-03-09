@@ -1,0 +1,96 @@
+﻿@model Clase_Abstracta.Models.Drink
+<link rel="stylesheet" href="~/css//style2.css" />
+<h2>Cocteles</h2>
+<h5>De click sobre algun coctel para revisar sus instrucciones de preparación</h5>
+<hr />
+@using (Html.BeginForm("Index", "Cocktail", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    <div class="row">
+
+        <div class="col-md-6 text-center align-middle">
+            <div class="input-group mb-3">
+                <span class="input-group-text"><i class="fa-solid fa-martini-glass"></i></span>
+                <input type="text" class="form-control" name="nombre" placeholder="Ingrese un nombre o ingrediente">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="input-group mb-3" id="buscar">
+                <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
+                <input type="submit" value="Buscar" class="btn btn-success" />
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h5>@ViewBag.Mensaje</h5>
+        </div>
+    </div>
+
+}@if (Model.Drinks != null)
+{
+    <div class="card-container">
+        @foreach (Clase_Abstracta.Models.Drink drink in Model.Drinks)
+        {
+
+
+            <div class="coctel-card">
+                <img src="@drink.Imagen" alt="Nombre del Coctel">
+                <div class="coctel-info">
+                    <h2>@drink.Nombre</h2>
+                    <p class="descripcion">@drink.Ingredientes</p>
+                    <p class="Instrucciones" style="display: none;">@drink.Instrucciones</p>
+                </div>
+            </div>
+
+        }
+    </div>
+
+}
+else
+{
+    <div>
+        <h2 class="text-center">!Ups, al parecer no hay Cocteles que coincidan con tu busqueda</h2>
+
+    </div>
+}
+@section Scripts{
+<script type="text/javascript">
+
+    const cocteles = document.querySelectorAll('.coctel-card');
+    let tarjetaAbierta = null;
+
+    // agrega un evento clic a cada tarjeta
+    cocteles.forEach(coctel => {
+      coctel.addEventListener('click', () => {
+        // verifica si hay una tarjeta abierta y ciérrala antes de abrir una nueva
+        if (tarjetaAbierta !== null && tarjetaAbierta !== coctel) {
+          tarjetaAbierta.classList.remove('mostrar-descripcion');
+          tarjetaAbierta.querySelector('.Instrucciones').style.display = 'none';
+        }
+
+        // abre o cierra la descripción de la tarjeta actual
+        coctel.classList.toggle('mostrar-descripcion');
+
+        // muestra u oculta las instrucciones de la tarjeta actual
+        const instrucciones = coctel.querySelector('.Instrucciones');
+        if (instrucciones.style.display === 'none') {
+          instrucciones.style.display = 'block';
+        } else {
+          instrucciones.style.display = 'none';
+        }
+
+        tarjetaAbierta = coctel;
+      });
+    });
+
+
+        $(document).ready(function Animar(){
+            $('#buscar').hover(function(){
+                $('#buscar').addClass('fa-bounce');
+            },
+            function(){
+                $('#buscar').removeClass('fa-bounce');
+            });
+        });
+</script>
+}

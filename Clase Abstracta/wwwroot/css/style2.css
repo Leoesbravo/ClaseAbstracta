@@ -1,0 +1,45 @@
+﻿.coctel-card {
+    display: inline-block;
+    width: 30%;
+    margin: 1.5%;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    .coctel-card:hover {
+        transform: scale(1.05);
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .coctel-card img {
+        width: 100%;
+        height: auto;
+    }
+
+.coctel-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 10px;
+    color: #fff;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.coctel-card:hover .coctel-info,
+.mostrar-descripcion .coctel-info {
+    opacity: 1;
+}
+
+.coctel-info h2 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.coctel-info p {
+    margin: 0;
+    font-size: 0.8rem;
+}
