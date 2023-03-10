@@ -33,12 +33,12 @@
         {
 
 
-            <div class="coctel-card">
+            <div class="coctel-card" onclick="ConsultarDetalle('@drink.IdDrink')" >
                 <img src="@drink.Imagen" alt="Nombre del Coctel">
                 <div class="coctel-info">
                     <h2>@drink.Nombre</h2>
-                    <p class="descripcion">@drink.Ingredientes</p>
-                    <p class="Instrucciones" style="display: none;">@drink.Instrucciones</p>
+  @*                  <p class="Instrucciones ingredientes" id="ingrediente">@drink.Ingredientes</p>*@
+                    <p class="Instrucciones" id="Instrucciones"></p>
                 </div>
             </div>
 
@@ -56,41 +56,83 @@ else
 @section Scripts{
 <script type="text/javascript">
 
-    const cocteles = document.querySelectorAll('.coctel-card');
-    let tarjetaAbierta = null;
-
-    // agrega un evento clic a cada tarjeta
-    cocteles.forEach(coctel => {
-      coctel.addEventListener('click', () => {
-        // verifica si hay una tarjeta abierta y ciérrala antes de abrir una nueva
-        if (tarjetaAbierta !== null && tarjetaAbierta !== coctel) {
-          tarjetaAbierta.classList.remove('mostrar-descripcion');
-          tarjetaAbierta.querySelector('.Instrucciones').style.display = 'none';
-        }
-
-        // abre o cierra la descripción de la tarjeta actual
-        coctel.classList.toggle('mostrar-descripcion');
-
-        // muestra u oculta las instrucciones de la tarjeta actual
-        const instrucciones = coctel.querySelector('.Instrucciones');
-        if (instrucciones.style.display === 'none') {
-          instrucciones.style.display = 'block';
-        } else {
-          instrucciones.style.display = 'none';
-        }
-
-        tarjetaAbierta = coctel;
-      });
-    });
-
-
-        $(document).ready(function Animar(){
-            $('#buscar').hover(function(){
-                $('#buscar').addClass('fa-bounce');
-            },
-            function(){
-                $('#buscar').removeClass('fa-bounce');
+            $(document).ready(function Animar(){
+                $('#buscar').hover(function(){
+                    $('#buscar').addClass('fa-bounce');
+                },
+                function(){
+                    $('#buscar').removeClass('fa-bounce');
+                });
             });
-        });
+
+
+const cocteles = document.querySelectorAll('.coctel-card');
+let tarjetaAbierta = null;
+
+// agrega un evento clic a cada tarjeta
+cocteles.forEach(coctel => {
+  coctel.addEventListener('click', () => {
+    // verifica si hay una tarjeta abierta y ciérrala antes de abrir una nueva
+    if (tarjetaAbierta !== null && tarjetaAbierta !== coctel) {
+      tarjetaAbierta.classList.remove('mostrar-descripcion');
+      tarjetaAbierta.querySelector('.Instrucciones').style.display = 'none';
+    }
+
+    // muestra u oculta las instrucciones de la tarjeta actual
+    const instrucciones = coctel.querySelector('.Instrucciones');
+
+    // verifica si las instrucciones ya se han cargado
+    if (instrucciones.innerHTML !== '') {
+      // abre o cierra la descripción de la tarjeta actual
+      coctel.classList.toggle('mostrar-descripcion');
+      instrucciones.style.display = 'block';
+    } else {
+      // muestra un mensaje de carga mientras se realiza la petición AJAX
+      instrucciones.innerHTML = '<p>Cargando...</p>';
+
+      // realiza la petición AJAX
+      $.ajax({
+        url: "/Cocktail/ConsultarDetalle",
+        type: "GET",
+        data: { idCoctel: coctel.getAttribute('onclick').match(/\d+/)[0] },
+        success: function(response){
+         var coctel = JSON.parse(response);
+           var ingredientesStr = '';
+  for (var i = 1; i <= 15; i++) {
+    var ingrediente = coctel.drinks[0]['strIngredient'+i];
+    if (ingrediente) {
+      //ingredientesStr += ingrediente + ', ';
+      ingredientesStr += '<img src="https://www.thecocktaildb.com/images/ingredients/'+ingrediente+'-Small.png" alt="'+ingrediente+'" width="20" height="20">' + coctel.drinks[0]['strIngredient'+i] + ' ' +  coctel.drinks[0]['strMeasure'+i] + ', ';
+    }
+  }
+  ingredientesStr = ingredientesStr.slice(0, -2); // Eliminar la última coma y espacio
+  instrucciones.innerHTML = "Ingredientes: " + ingredientesStr + "<br>" + coctel.drinks[0].strInstructions;
+
+
+
+  // asignar valor y mostrar la etiqueta con el id "ingredientes"
+  //const ingredientes = instrucciones.querySelector('#ingredientes');
+  //ingredientes.innerHTML = coctel.drinks[0].strIngredient1 + ', ' + coctel.drinks[0].strIngredient2 + ', ' + coctel.drinks[0].strIngredient3;
+  //ingredientes.style.display = 'block';
+
+  // abrir la descripción de la tarjeta actual después de cargar las instrucciones
+  coctel.classList.add('mostrar-descripcion');
+  instrucciones.style.display = 'block';
+
+  tarjetaAbierta = coctel;
+        },
+        error: function(xhr, textStatus, errorThrown){
+          // manejar el error aquí
+          instrucciones.innerHTML = '<p>Ha ocurrido un error al cargar las instrucciones.</p>';
+          console.log(textStatus); // ejemplo de impresión en consola del error
+        }
+      });
+    }
+
+    tarjetaAbierta = coctel;
+  });
+});
+
+
 </script>
 }

@@ -43,3 +43,8 @@
     margin: 0;
     font-size: 0.8rem;
 }
+
+.coctel-info img {
+    max-width: 20px;
+    margin-right: 5px;
+}

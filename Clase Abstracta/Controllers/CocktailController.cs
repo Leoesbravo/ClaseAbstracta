@@ -22,45 +22,48 @@ namespace Clase_Abstracta.Controllers
         [HttpPost]
         public ActionResult Index(string nombre)
         {
-            var result = "";
             Models.Drink drinks = new Models.Drink();
-
-            var json = _Bebidas.ConsultarCocktail("search.php?s="+nombre);
-            json.Wait();
-            if(json.Result.Length < 20)
-            {
-                var jsonByIngrediente = _Bebidas.ConsultarCocktail("filter.php?i="+nombre);
-                jsonByIngrediente.Wait();
-                if (jsonByIngrediente.Result.Length > 20)
-                {
-                     result = jsonByIngrediente.Result;
-                    ViewBag.Mensaje = "Lista de Cocteles que incluyen " + nombre;
-                }
-                else
-                {
-                    return View(drinks);
-                }
-            }
-            else
-            {
-                ViewBag.Mensaje = "Lista de Cocteles con el nombre " + nombre;
-                result = json.Result;
-            }
             drinks.Drinks = new List<Models.Drink>();
-            dynamic resultJSON = JObject.Parse(result);
-            foreach (var resultItem in resultJSON.drinks)
+            var json = _Bebidas.ConsultarCocktail("search.php?s=" + nombre);
+            json.Wait();
+            if(json.Result.Length > 15)
+            {
+                drinks.Drinks = GenerarListas(json.Result);
+            }
+            var jsonByIngrediente = _Bebidas.ConsultarCocktail("filter.php?i=" + nombre);
+            jsonByIngrediente.Wait();
+            if(jsonByIngrediente.Result.Length > 15)
+            {
+                drinks.Drinks.AddRange(GenerarListas(jsonByIngrediente.Result));
+            }
+
+            return View(drinks);
+        }
+
+        public List<Models.Drink> GenerarListas(string data)
+        {
+
+            Models.Drink drinks = new Models.Drink();
+            drinks.Drinks = new List<Models.Drink>();
+            dynamic resultJSON = JObject.Parse(data);
+            foreach (var result in resultJSON.drinks)
             {
                 Models.Drink drink = new Models.Drink();
-                drink.IdDrink = resultItem.idDrink;
-                drink.Nombre = resultItem.strDrink;
-                drink.Categoria = resultItem.strCategory;
-                drink.Instrucciones = resultItem.strInstructions;
-                drink.Imagen = resultItem.strDrinkThumb;
-                drink.Ingredientes = resultItem.strIngredient1 + ", " + resultItem.strIngredient2 + ", " + resultItem.strIngredient3 + ", " + resultItem.strIngredient4;
+                drink.IdDrink = result.idDrink;
+                drink.Nombre = result.strDrink;
+                drink.Imagen = result.strDrinkThumb;
 
                 drinks.Drinks.Add(drink);
             }
-            return View(drinks);
+            return drinks.Drinks;
+        }
+
+        public JsonResult ConsultarDetalle(string idCoctel)
+        {
+            var json = _Bebidas.ConsultarCocktail("lookup.php?i=" + idCoctel);
+            json.Wait();
+
+            return Json(json.Result);
         }
     }
 }
